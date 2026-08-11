@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native'
+import { act, renderHook, waitFor } from '@testing-library/react-native'
 import { useDayDetailFeed } from '../useDayDetailFeed'
 
 const mockGetAllDays = jest.fn()
@@ -62,5 +62,29 @@ describe('useDayDetailFeed', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.initialIndex).toBe(0)
+  })
+
+  it('surfaces an error instead of hanging when the fetch rejects', async () => {
+    mockGetAllDays.mockRejectedValue(new Error('SQLITE_BUSY'))
+
+    const { result } = renderHook(() => useDayDetailFeed('2026-06-08'))
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    expect(result.current.error).toBe(true)
+    expect(result.current.entries).toEqual([])
+  })
+
+  it('clears the error and refetches when retry is called', async () => {
+    mockGetAllDays.mockRejectedValueOnce(new Error('SQLITE_BUSY'))
+    mockGetAllDays.mockResolvedValueOnce([{ date: '2026-06-08', photo_path: '/a.jpg' }])
+
+    const { result } = renderHook(() => useDayDetailFeed('2026-06-08'))
+    await waitFor(() => expect(result.current.error).toBe(true))
+
+    act(() => result.current.retry())
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.error).toBe(false)
+    expect(result.current.entries.map((e) => e.date)).toEqual(['2026-06-08'])
   })
 })

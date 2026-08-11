@@ -285,6 +285,32 @@ describe('usePhotoPicker', () => {
       expect(result.current.pendingUri).toBeNull()
     })
 
+    it('keeps the preview open with pendingUri set while the confirmed photo is being saved', async () => {
+      mockRequestMediaLibraryPermission.mockResolvedValue('granted')
+      mockLaunchImageLibraryAsync.mockResolvedValue({
+        canceled: false,
+        assets: [{ uri: 'content://gallery/photo.jpg', exif: undefined }],
+      })
+      let resolveSave!: (path: string) => void
+      mockSavePhoto.mockReturnValue(new Promise<string>((res) => (resolveSave = res)))
+      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+
+      await act(async () => {
+        await result.current.sheetProps.onChooseFromGallery()
+      })
+      act(() => {
+        result.current.onConfirmPhoto()
+      })
+      await act(async () => {})
+
+      expect(result.current.isSaving).toBe(true)
+      expect(result.current.pendingUri).toBe('content://gallery/photo.jpg')
+
+      await act(async () => resolveSave('file://documents/photos/456.jpg'))
+
+      expect(result.current.pendingUri).toBeNull()
+    })
+
     it('re-opens the gallery when the user taps Back on the preview', async () => {
       mockRequestMediaLibraryPermission.mockResolvedValue('granted')
       mockLaunchImageLibraryAsync

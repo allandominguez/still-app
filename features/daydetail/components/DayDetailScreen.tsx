@@ -1,9 +1,9 @@
 import { IconArrowLeft } from '@tabler/icons-react-native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useRef, useState } from 'react'
-import { FlatList, Pressable, StyleSheet, View, ViewToken } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Colors, Spacing } from '../../../lib/design'
+import { Colors, Radii, Spacing, Typography } from '../../../lib/design'
 import { DayEntry } from '../../../lib/repositories/day'
 import { RootStackParamList } from '../../../navigation/types'
 import { useDateOverlayVisibility } from '../hooks/useDateOverlayVisibility'
@@ -17,7 +17,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'DayDetail'>
 const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 }
 
 export function DayDetailScreen({ navigation, route }: Props) {
-  const { entries, initialIndex, isLoading } = useDayDetailFeed(route.params.date)
+  const { entries, initialIndex, isLoading, error, retry } = useDayDetailFeed(route.params.date)
   const [pageHeight, setPageHeight] = useState(0)
   const [visibleIndex, setVisibleIndex] = useState<number | null>(null)
   const focusedIndex = visibleIndex ?? initialIndex
@@ -74,6 +74,19 @@ export function DayDetailScreen({ navigation, route }: Props) {
             })}
           />
         )}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Something went wrong loading this day.</Text>
+            <Pressable
+              onPress={retry}
+              accessibilityRole="button"
+              accessibilityLabel="Retry loading day"
+              style={styles.retryButton}
+            >
+              <Text style={styles.retryButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
       {!dateOverlayVisible && (
         <Pressable
@@ -104,5 +117,28 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     opacity: 0.6,
+  },
+  errorContainer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  errorText: {
+    ...Typography.bodyLg,
+    color: Colors.surface,
+    textAlign: 'center',
+  },
+  retryButton: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: Radii.md,
+    borderWidth: 1,
+    borderColor: Colors.surface,
+  },
+  retryButtonText: {
+    ...Typography.labelMd,
+    color: Colors.surface,
   },
 })
