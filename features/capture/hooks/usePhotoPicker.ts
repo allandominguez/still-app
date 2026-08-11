@@ -111,11 +111,9 @@ export function usePhotoPicker(
 
   const onConfirmPhoto = async () => {
     if (!pendingUri) return
-    const uri = pendingUri
-    const exifGps = pendingExifGps
+    await saveAndNotify(pendingUri, pendingExifGps, 'gallery')
     setPendingUri(null)
     setPendingExifGps(null)
-    await saveAndNotify(uri, exifGps, 'gallery')
   }
 
   const onCancelPreview = async () => {

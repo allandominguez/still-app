@@ -230,6 +230,52 @@ describe('CalendarScreen', () => {
       expect(navigation.navigate).toHaveBeenCalledWith('DayDetail', { date: '2026-07-21' })
     })
 
+    it('shows a saving indicator while a camera-captured photo is being saved', async () => {
+      mockRequestCameraPermission.mockResolvedValue('granted')
+      mockLaunchCameraAsync.mockResolvedValue({
+        canceled: false,
+        assets: [{ uri: 'file://camera-temp.jpg', exif: undefined }],
+      })
+      let resolveSave!: (path: string) => void
+      mockSavePhoto.mockReturnValue(new Promise<string>((res) => (resolveSave = res)))
+      await renderScreen()
+
+      await pressCell('22, add photo')
+      await act(async () => {
+        fireEvent.press(screen.getByLabelText('Take photo'))
+        for (let i = 0; i < 5; i++) await Promise.resolve()
+      })
+
+      expect(screen.getByLabelText('Saving photo')).toBeTruthy()
+
+      await act(async () => resolveSave('file://documents/photos/999.jpg'))
+
+      expect(screen.queryByLabelText('Saving photo')).toBeNull()
+    })
+
+    it('keeps the photo preview open instead of the saving overlay while a gallery pick is being saved', async () => {
+      mockRequestMediaLibraryPermission.mockResolvedValue('granted')
+      mockLaunchImageLibraryAsync.mockResolvedValue({
+        canceled: false,
+        assets: [{ uri: 'content://gallery/photo.jpg', exif: undefined }],
+      })
+      let resolveSave!: (path: string) => void
+      mockSavePhoto.mockReturnValue(new Promise<string>((res) => (resolveSave = res)))
+      await renderScreen()
+
+      await pressCell('21, add photo')
+      await press('Choose from gallery')
+      await act(async () => {
+        fireEvent.press(screen.getByLabelText('Use photo'))
+        for (let i = 0; i < 5; i++) await Promise.resolve()
+      })
+
+      expect(screen.getByText('Saving…')).toBeTruthy()
+      expect(screen.queryByLabelText('Saving photo')).toBeNull()
+
+      await act(async () => resolveSave('file://documents/photos/456.jpg'))
+    })
+
     it('shows a permission alert when photo access is blocked', async () => {
       mockRequestMediaLibraryPermission.mockResolvedValue('blocked')
       const alertSpy = jest.spyOn(Alert, 'alert')

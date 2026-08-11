@@ -1,12 +1,13 @@
 import { useFocusEffect } from '@react-navigation/native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { IconArrowBarToDown, IconArrowForwardUp, IconPlus } from '@tabler/icons-react-native'
+import { IconArrowDown, IconArrowForwardUp, IconPlus } from '@tabler/icons-react-native'
 import * as Sharing from 'expo-sharing'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Animated, FlatList, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { PhotoPickerSheet } from '../../capture/components/PhotoPickerSheet'
 import { PhotoPreview } from '../../capture/components/PhotoPreview'
+import { SavingOverlay } from '../../capture/components/SavingOverlay'
 import { useCapture } from '../../capture/hooks/useCapture'
 import { Colors, Radii, Spacing, Typography } from '../../../lib/design'
 import { getTraceLogUri, trace } from '../../../lib/logging/trace'
@@ -229,7 +230,7 @@ export function CalendarScreen({ navigation }: Props) {
             accessibilityLabel="Jump to current month"
             hitSlop={12}
           >
-            <IconArrowBarToDown size={18} color={Colors.textTertiary} />
+            <IconArrowDown size={18} color={Colors.textTertiary} />
           </Pressable>
         </Animated.View>
       </View>
@@ -248,6 +249,7 @@ export function CalendarScreen({ navigation }: Props) {
         onConfirm={capture.onConfirmPhoto}
         onCancel={capture.onCancelPreview}
       />
+      <SavingOverlay visible={capture.isSaving && !capture.pendingUri} />
     </SafeAreaView>
   )
 }

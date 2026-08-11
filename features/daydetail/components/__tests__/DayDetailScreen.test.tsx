@@ -98,4 +98,30 @@ describe('DayDetailScreen', () => {
 
     expect(goBack).toHaveBeenCalledTimes(1)
   })
+
+  it('shows a retry option instead of a blank screen when loading the day fails', async () => {
+    mockGetAllDays.mockRejectedValue(new Error('SQLITE_BUSY'))
+
+    await renderScreen()
+
+    expect(screen.getByText('Something went wrong loading this day.')).toBeTruthy()
+    expect(screen.getByLabelText('Retry loading day')).toBeTruthy()
+  })
+
+  it('reloads the day after tapping retry following a failed load', async () => {
+    mockGetAllDays.mockRejectedValueOnce(new Error('SQLITE_BUSY'))
+    mockGetAllDays.mockResolvedValueOnce([
+      { date: '2026-06-08', photo_path: '/photos/2026-06-08.jpg' },
+    ])
+
+    await renderScreen()
+    expect(screen.getByLabelText('Retry loading day')).toBeTruthy()
+
+    await act(async () => {
+      fireEvent.press(screen.getByLabelText('Retry loading day'))
+      await Promise.resolve()
+    })
+
+    expect(screen.queryByLabelText('Retry loading day')).toBeNull()
+  })
 })
