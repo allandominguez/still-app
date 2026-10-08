@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  # Feature branches are covered by pull_request; this catches whatever lands on main.
+  push:
+    branches: [main]
+
+# Least privilege: neither job writes to the repo.
+permissions:
+  contents: read
+
+# Supersede redundant runs on the same branch, but never cancel a main run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      # Jobs sharing this key may log "Failed to save: ... another job may be
+      # creating this cache" — expected; check other jobs for "Cache saved with key".
+      - uses: actions/cache@v6
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      # Run every static check even if an earlier one failed, so one CI run reports all issues at once.
+      - run: npx expo-doctor
+      - run: npm run lint
+        if: ${{ !cancelled() }}
+      - run: npm run typecheck
+        if: ${{ !cancelled() }}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      # Jobs sharing this key may log "Failed to save: ... another job may be
+      # creating this cache" — expected; check other jobs for "Cache saved with key".
+      - uses: actions/cache@v6
+        id: node-modules-cache
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      - run: npm test
