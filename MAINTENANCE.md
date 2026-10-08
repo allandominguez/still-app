@@ -48,7 +48,7 @@ An SDK bump touches native modules, React, React Native, and the test toolchain 
 
 1. **Try an in-range refresh first.** `npm update <package>` or `npm audit fix` moves vulnerable transitive dependencies to patched versions without touching `package.json`. A stale lockfile, not an unfixable dependency, was the cause of the `brace-expansion` and `@xmldom/xmldom` findings here.
 2. **Don't add `overrides` to silence a finding.** They pin transitive dependencies outside the ranges their parents declare, and they go stale and can break tools (a blanket `brace-expansion` override broke `minimatch`'s brace expansion across ESLint, Jest and Expo's toolchain). They were removed from this repo deliberately.
-3. **Document what's left.** If the only fixes are downgrades or a major bump a pinned tool blocks, record the finding in [`SECURITY.md`](SECURITY.md) under Known Accepted Findings and dismiss the matching Dependabot alert in GitHub with that reason.
+3. **Document what's left.** If the only fixes are downgrades or a major bump a pinned tool blocks, record the finding in [`SECURITY.md`](SECURITY.md) under Known Accepted Findings. Leave the matching Dependabot alert open: it keeps GitHub's reminder alive and lets Dependabot raise a fix PR as soon as a patch is published, whereas a dismissed alert does neither. If an alert becomes pure noise you have decided to accept, dismiss it with the reason "vulnerable code is not actually used" and rely on `npm audit` and the re-check triggers in `SECURITY.md` instead.
 
 ## Release builds
 
