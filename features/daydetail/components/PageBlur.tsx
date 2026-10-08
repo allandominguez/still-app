@@ -1,15 +1,17 @@
 import { BlurView } from 'expo-blur'
-import { useEffect, useRef } from 'react'
-import { Animated, StyleSheet } from 'react-native'
+import { RefObject, useEffect, useRef } from 'react'
+import { Animated, StyleSheet, View } from 'react-native'
 
 const TRANSITION_MS = 300
 
 type Props = {
   visible: boolean
+  // Android blurs only the BlurTargetView it points at; without one the blur falls back to a flat dim.
+  blurTarget: RefObject<View | null>
 }
 
 // Always mounted, only opacity toggles — keeps the native blur warmed up instead of cold-starting on reveal.
-export function PageBlur({ visible }: Props) {
+export function PageBlur({ visible, blurTarget }: Props) {
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current
 
   useEffect(() => {
@@ -27,7 +29,8 @@ export function PageBlur({ visible }: Props) {
       <BlurView
         intensity={100}
         tint="dark"
-        experimentalBlurMethod="dimezisBlurView"
+        blurMethod="dimezisBlurView"
+        blurTarget={blurTarget}
         style={StyleSheet.absoluteFill}
       />
     </Animated.View>
