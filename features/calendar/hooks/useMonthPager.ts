@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FlatList, GestureResponderHandlers, PanResponder, ViewToken } from 'react-native'
 import { MonthData } from '../types'
 import { isHorizontalSwipe, monthSwipeTarget, yearSwipeTarget } from '../utils'
@@ -18,7 +18,7 @@ type MonthPager = {
 export function useMonthPager(months: MonthData[]): MonthPager {
   // Ascending order: oldest at index 0, current month at the end.
   // FlatList starts at the last item; scrolling up reveals older months.
-  const displayMonths = useMemo(() => [...months], [months])
+  const displayMonths = months
 
   const [visibleIndex, setVisibleIndex] = useState<number | null>(null)
   const currentIndex = visibleIndex ?? displayMonths.length - 1
@@ -35,10 +35,10 @@ export function useMonthPager(months: MonthData[]): MonthPager {
     currentIndexRef.current = currentIndex
   }, [currentIndex])
 
-  const scrollToIndex = useCallback((index: number) => {
+  const scrollToIndex = (index: number) => {
     const clamped = Math.max(0, Math.min(displayMonthsRef.current.length - 1, index))
     flatListRef.current?.scrollToIndex({ index: clamped, animated: true })
-  }, [])
+  }
 
   // Swipe right = newer month (higher index), swipe left = older month (lower index)
   const monthPanHandlers = useRef(

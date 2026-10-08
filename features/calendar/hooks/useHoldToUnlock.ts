@@ -15,6 +15,8 @@ export function useHoldToUnlock(onUnlock: () => void): HoldToUnlock {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const completedRef = useRef(false)
 
+  // Stable identity: the unmount effect below uses it as its cleanup, so a new one each render
+  // would cancel an in-progress hold.
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
@@ -22,20 +24,20 @@ export function useHoldToUnlock(onUnlock: () => void): HoldToUnlock {
     }
   }, [])
 
-  const onPressIn = useCallback(() => {
+  const onPressIn = () => {
     completedRef.current = false
     timerRef.current = setTimeout(() => {
       completedRef.current = true
       timerRef.current = null
       onUnlock()
     }, HOLD_DURATION_MS)
-  }, [onUnlock])
+  }
 
-  const consumeLongHold = useCallback(() => {
+  const consumeLongHold = () => {
     const was = completedRef.current
     completedRef.current = false
     return was
-  }, [])
+  }
 
   useEffect(() => clearTimer, [clearTimer])
 
