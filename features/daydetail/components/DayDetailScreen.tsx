@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   errorContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.lg,

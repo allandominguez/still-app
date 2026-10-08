@@ -84,57 +84,59 @@ describe('DayDetailPage', () => {
     jest.useRealTimers()
   })
 
-  it('shows the photo for the entry', () => {
-    render(<DayDetailPage {...makeProps()} />)
+  it('shows the photo for the entry', async () => {
+    await render(<DayDetailPage {...makeProps()} />)
     expect(screen.getByLabelText('Photo from Monday, 8 June 2026')).toBeTruthy()
   })
 
-  it('traces a failed image load, for diagnosing the intermittent black-screen report', () => {
-    render(<DayDetailPage {...makeProps({ entry: makeEntry({ date: '2026-06-08' }) })} />)
+  it('traces a failed image load, for diagnosing the intermittent black-screen report', async () => {
+    await render(<DayDetailPage {...makeProps({ entry: makeEntry({ date: '2026-06-08' }) })} />)
 
-    fireEvent(screen.getByLabelText('Photo from Monday, 8 June 2026'), 'error')
+    await fireEvent(screen.getByLabelText('Photo from Monday, 8 June 2026'), 'error')
 
     expect(mockTrace).toHaveBeenCalledWith('[DayDetailPage] image failed to load', {
       date: '2026-06-08',
     })
   })
 
-  it('shows the date overlay when focused and the date overlay is visible', () => {
-    render(<DayDetailPage {...makeProps({ dateOverlayVisible: true })} />)
+  it('shows the date overlay when focused and the date overlay is visible', async () => {
+    await render(<DayDetailPage {...makeProps({ dateOverlayVisible: true })} />)
     expect(screen.getByText('8\nMon')).toBeTruthy()
   })
 
-  it('does not show the date overlay when not focused, even if marked visible', () => {
-    render(<DayDetailPage {...makeProps({ isFocused: false, dateOverlayVisible: true })} />)
+  it('does not show the date overlay when not focused, even if marked visible', async () => {
+    await render(<DayDetailPage {...makeProps({ isFocused: false, dateOverlayVisible: true })} />)
     expect(screen.queryByText('8\nMon')).toBeNull()
   })
 
-  it('dismisses the date overlay when tapped while it is showing', () => {
+  it('dismisses the date overlay when tapped while it is showing', async () => {
     const dismissDateOverlay = jest.fn()
     const toggleDetailOverlay = jest.fn()
-    render(
+    await render(
       <DayDetailPage
         {...makeProps({ dateOverlayVisible: true, dismissDateOverlay, toggleDetailOverlay })}
       />,
     )
 
-    fireEvent.press(screen.getByLabelText('Dismiss date label'))
+    await fireEvent.press(screen.getByLabelText('Dismiss date label'))
 
     expect(dismissDateOverlay).toHaveBeenCalledTimes(1)
     expect(toggleDetailOverlay).not.toHaveBeenCalled()
   })
 
-  it('toggles day details when tapped once the date overlay has cleared', () => {
+  it('toggles day details when tapped once the date overlay has cleared', async () => {
     const toggleDetailOverlay = jest.fn()
-    render(<DayDetailPage {...makeProps({ dateOverlayVisible: false, toggleDetailOverlay })} />)
+    await render(
+      <DayDetailPage {...makeProps({ dateOverlayVisible: false, toggleDetailOverlay })} />,
+    )
 
-    fireEvent.press(screen.getByLabelText('Show day details'))
+    await fireEvent.press(screen.getByLabelText('Show day details'))
 
     expect(toggleDetailOverlay).toHaveBeenCalledTimes(1)
   })
 
-  it('shows day details overlay when focused and detailOverlayVisible is true', () => {
-    render(
+  it('shows day details overlay when focused and detailOverlayVisible is true', async () => {
+    await render(
       <DayDetailPage
         {...makeProps({
           entry: makeEntry({ location_name: 'Mission District' }),
@@ -145,8 +147,8 @@ describe('DayDetailPage', () => {
     expect(screen.getByText('Mission District')).toBeTruthy()
   })
 
-  it('does not show day details overlay when not focused, even if marked visible', () => {
-    render(
+  it('does not show day details overlay when not focused, even if marked visible', async () => {
+    await render(
       <DayDetailPage
         {...makeProps({
           entry: makeEntry({ location_name: 'Mission District' }),
@@ -158,70 +160,70 @@ describe('DayDetailPage', () => {
     expect(screen.queryByText('Mission District')).toBeNull()
   })
 
-  it('does not respond to taps when not focused', () => {
+  it('does not respond to taps when not focused', async () => {
     const dismissDateOverlay = jest.fn()
     const toggleDetailOverlay = jest.fn()
-    render(
+    await render(
       <DayDetailPage
         {...makeProps({ isFocused: false, dismissDateOverlay, toggleDetailOverlay })}
       />,
     )
 
-    fireEvent.press(screen.getByRole('button'))
+    await fireEvent.press(screen.getByRole('button'))
 
     expect(dismissDateOverlay).not.toHaveBeenCalled()
     expect(toggleDetailOverlay).not.toHaveBeenCalled()
   })
 
-  it('blurs the photo when not focused', () => {
-    render(<DayDetailPage {...makeProps({ isFocused: false })} />)
+  it('blurs the photo when not focused', async () => {
+    await render(<DayDetailPage {...makeProps({ isFocused: false })} />)
     expect(screen.getByText('true')).toBeTruthy()
   })
 
-  it('blurs the photo while the date overlay is still showing', () => {
-    render(<DayDetailPage {...makeProps({ dateOverlayVisible: true })} />)
+  it('blurs the photo while the date overlay is still showing', async () => {
+    await render(<DayDetailPage {...makeProps({ dateOverlayVisible: true })} />)
     expect(screen.getByText('true')).toBeTruthy()
   })
 
-  it('reveals the photo once the date overlay has cleared', () => {
-    render(<DayDetailPage {...makeProps({ dateOverlayVisible: false })} />)
+  it('reveals the photo once the date overlay has cleared', async () => {
+    await render(<DayDetailPage {...makeProps({ dateOverlayVisible: false })} />)
     expect(screen.getByText('false')).toBeTruthy()
   })
 
-  function renderWithDetailsOpen(overrides: Partial<Props> = {}) {
+  async function renderWithDetailsOpen(overrides: Partial<Props> = {}) {
     return render(<DayDetailPage {...makeProps({ detailOverlayVisible: true, ...overrides })} />)
   }
 
-  it('saves the note after the debounce elapses while typing', () => {
-    renderWithDetailsOpen({ entry: makeEntry({ date: '2026-06-08' }) })
+  it('saves the note after the debounce elapses while typing', async () => {
+    await renderWithDetailsOpen({ entry: makeEntry({ date: '2026-06-08' }) })
 
-    fireEvent.changeText(screen.getByLabelText('Note for this day'), 'A great day')
-    act(() => {
+    await fireEvent.changeText(screen.getByLabelText('Note for this day'), 'A great day')
+    await act(() => {
       jest.advanceTimersByTime(600)
     })
 
     expect(mockUpdateNoteText).toHaveBeenCalledWith('2026-06-08', 'A great day')
   })
 
-  it('consumes the tap immediately following a note blur, without toggling day details', () => {
+  it('consumes the tap immediately following a note blur, without toggling day details', async () => {
     const toggleDetailOverlay = jest.fn()
-    renderWithDetailsOpen({ toggleDetailOverlay })
+    await renderWithDetailsOpen({ toggleDetailOverlay })
 
-    fireEvent(screen.getByLabelText('Note for this day'), 'blur')
-    fireEvent.press(screen.getByLabelText('Hide day details'))
+    await fireEvent(screen.getByLabelText('Note for this day'), 'blur')
+    await fireEvent.press(screen.getByLabelText('Hide day details'))
 
     expect(toggleDetailOverlay).not.toHaveBeenCalled()
   })
 
-  it('toggles day details normally once the post-blur tap has settled', () => {
+  it('toggles day details normally once the post-blur tap has settled', async () => {
     const toggleDetailOverlay = jest.fn()
-    renderWithDetailsOpen({ toggleDetailOverlay })
+    await renderWithDetailsOpen({ toggleDetailOverlay })
 
-    fireEvent(screen.getByLabelText('Note for this day'), 'blur')
-    act(() => {
+    await fireEvent(screen.getByLabelText('Note for this day'), 'blur')
+    await act(() => {
       jest.advanceTimersByTime(1)
     })
-    fireEvent.press(screen.getByLabelText('Hide day details'))
+    await fireEvent.press(screen.getByLabelText('Hide day details'))
 
     expect(toggleDetailOverlay).toHaveBeenCalledTimes(1)
   })
@@ -229,10 +231,10 @@ describe('DayDetailPage', () => {
   it('prompts for confirmation and leaves the photo untouched when deletion is cancelled', async () => {
     simulateAlert('Cancel')
     const onPhotoDeleted = jest.fn()
-    renderWithDetailsOpen({ entry: makeEntry({ date: '2026-06-08' }), onPhotoDeleted })
+    await renderWithDetailsOpen({ entry: makeEntry({ date: '2026-06-08' }), onPhotoDeleted })
 
     await act(async () => {
-      fireEvent.press(screen.getByLabelText('Delete photo'))
+      await fireEvent.press(screen.getByLabelText('Delete photo'))
     })
 
     expect(mockDeletePhoto).not.toHaveBeenCalled()
@@ -243,13 +245,13 @@ describe('DayDetailPage', () => {
   it('deletes the photo and notifies the caller once deletion is confirmed', async () => {
     simulateAlert('Delete')
     const onPhotoDeleted = jest.fn()
-    renderWithDetailsOpen({
+    await renderWithDetailsOpen({
       entry: makeEntry({ date: '2026-06-08', photo_path: '/photos/2026-06-08.jpg' }),
       onPhotoDeleted,
     })
 
     await act(async () => {
-      fireEvent.press(screen.getByLabelText('Delete photo'))
+      await fireEvent.press(screen.getByLabelText('Delete photo'))
     })
 
     expect(mockDeletePhoto).toHaveBeenCalledWith('/photos/2026-06-08.jpg')

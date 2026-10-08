@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
-import { Alert, AlertButton } from 'react-native'
+import { Alert, AlertButton, FlatList } from 'react-native'
 import { DayEntry } from '../../../../lib/repositories/day'
 import { RootStackParamList } from '../../../../navigation/types'
 import { CalendarScreen } from '../CalendarScreen'
@@ -120,13 +120,13 @@ function makeProps(overrides: Partial<Props> = {}): Props {
 
 async function renderScreen(overrides: Partial<Props> = {}) {
   const props = makeProps(overrides)
-  const result = render(<CalendarScreen {...props} />)
+  const result = await render(<CalendarScreen {...props} />)
   // Flush the getAllDays() load and let useFocusEffect settle.
   await act(async () => {
     await Promise.resolve()
   })
   // The FlatList only renders once the container reports a real layout height.
-  fireEvent(screen.getByTestId('calendar-list-container'), 'layout', {
+  await fireEvent(screen.getByTestId('calendar-list-container'), 'layout', {
     nativeEvent: { layout: { height: 800, width: 400 } },
   })
   return { ...result, navigation: props.navigation }
@@ -136,7 +136,7 @@ async function renderScreen(overrides: Partial<Props> = {}) {
 // getDay before showing the sheet — flush that microtask before asserting.
 async function pressCell(label: string) {
   await act(async () => {
-    fireEvent.press(screen.getByLabelText(label))
+    await fireEvent.press(screen.getByLabelText(label))
     await Promise.resolve()
   })
 }
@@ -145,7 +145,7 @@ async function pressCell(label: string) {
 // flush repeatedly rather than track the exact microtask count, which would be brittle.
 async function press(label: string) {
   await act(async () => {
-    fireEvent.press(screen.getByLabelText(label))
+    await fireEvent.press(screen.getByLabelText(label))
     for (let i = 0; i < 10; i++) {
       await Promise.resolve()
     }
@@ -170,7 +170,7 @@ describe('CalendarScreen', () => {
       mockStore = [makeEntry('2026-07-20')]
       const { navigation } = await renderScreen()
 
-      fireEvent.press(screen.getByLabelText('20, has photo'))
+      await fireEvent.press(screen.getByLabelText('20, has photo'))
 
       expect(navigation.navigate).toHaveBeenCalledWith('DayDetail', { date: '2026-07-20' })
     })
@@ -241,8 +241,10 @@ describe('CalendarScreen', () => {
       await renderScreen()
 
       await pressCell('22, add photo')
+      // Not awaited: RNTL 14 waits for the press handler, which only settles once the save we
+      // are deliberately holding open resolves.
       await act(async () => {
-        fireEvent.press(screen.getByLabelText('Take photo'))
+        void fireEvent.press(screen.getByLabelText('Take photo'))
         for (let i = 0; i < 5; i++) await Promise.resolve()
       })
 
@@ -266,7 +268,7 @@ describe('CalendarScreen', () => {
       await pressCell('21, add photo')
       await press('Choose from gallery')
       await act(async () => {
-        fireEvent.press(screen.getByLabelText('Use photo'))
+        void fireEvent.press(screen.getByLabelText('Use photo'))
         for (let i = 0; i < 5; i++) await Promise.resolve()
       })
 
@@ -352,16 +354,16 @@ describe('CalendarScreen', () => {
     // to a past month isn't reachable here — that swap is covered by the work item's
     // manual testing steps instead. This test sticks to what mounts on the current month:
     // the streak counter should be showing, and the jump-back control — always mounted
-    // underneath it so the two can crossfade — should be non-interactive.
+    // underneath it so the two can crossfade — should not respond to presses.
     it('shows the streak counter on the current month, with the jump-back control non-interactive', async () => {
+      const scrollToIndex = jest.spyOn(FlatList.prototype, 'scrollToIndex')
       mockStore = [makeEntry('2026-07-22')]
       await renderScreen()
 
       expect(screen.getByText('Best 1')).toBeTruthy()
-      const jumpBackButton = screen.getByLabelText('Jump to current month')
-      // Three levels up from the Pressable's own host view is the crossfading
-      // Animated.View layer that carries pointerEvents.
-      expect(jumpBackButton.parent?.parent?.parent?.props.pointerEvents).toBe('none')
+      await fireEvent.press(screen.getByLabelText('Jump to current month'))
+
+      expect(scrollToIndex).not.toHaveBeenCalled()
     })
   })
 
@@ -376,7 +378,7 @@ describe('CalendarScreen', () => {
       await renderScreen()
 
       const label = '22, has photo'
-      fireEvent(screen.getByLabelText(label), 'longPress')
+      await fireEvent(screen.getByLabelText(label), 'longPress')
       await press('Delete photo')
 
       expect(mockClearPhoto).toHaveBeenCalledWith('2026-07-22')
@@ -388,7 +390,7 @@ describe('CalendarScreen', () => {
       simulateAlert('Delete')
       await renderScreen()
 
-      fireEvent(screen.getByLabelText('22, has photo'), 'longPress')
+      await fireEvent(screen.getByLabelText('22, has photo'), 'longPress')
       await press('Delete photo')
 
       expect(screen.queryByLabelText('Delete photo')).toBeNull()

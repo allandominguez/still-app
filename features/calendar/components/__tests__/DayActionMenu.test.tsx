@@ -25,8 +25,8 @@ describe('DayActionMenu', () => {
     jest.clearAllMocks()
   })
 
-  it('names the day being acted on', () => {
-    render(
+  it('names the day being acted on', async () => {
+    await render(
       <DayActionMenu
         date="2026-07-14"
         photoPath="/photos/2026-07-14.jpg"
@@ -38,9 +38,9 @@ describe('DayActionMenu', () => {
     expect(screen.getByText('Tuesday, 14 July 2026')).toBeTruthy()
   })
 
-  it('dismisses when the backdrop is pressed', () => {
+  it('dismisses when the backdrop is pressed', async () => {
     const onClose = jest.fn()
-    render(
+    await render(
       <DayActionMenu
         date="2026-07-14"
         photoPath="/photos/2026-07-14.jpg"
@@ -49,7 +49,7 @@ describe('DayActionMenu', () => {
       />,
     )
 
-    fireEvent.press(screen.getByLabelText('Dismiss'))
+    await fireEvent.press(screen.getByLabelText('Dismiss'))
 
     expect(onClose).toHaveBeenCalledTimes(1)
   })
@@ -58,7 +58,7 @@ describe('DayActionMenu', () => {
     simulateAlert('Cancel')
     const onClose = jest.fn()
     const onDeleted = jest.fn()
-    render(
+    await render(
       <DayActionMenu
         date="2026-07-14"
         photoPath="/photos/2026-07-14.jpg"
@@ -79,7 +79,7 @@ describe('DayActionMenu', () => {
     simulateAlert('Delete')
     const onClose = jest.fn()
     const onDeleted = jest.fn()
-    render(
+    await render(
       <DayActionMenu
         date="2026-07-14"
         photoPath="/photos/2026-07-14.jpg"

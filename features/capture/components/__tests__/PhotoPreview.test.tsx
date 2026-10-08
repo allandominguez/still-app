@@ -11,47 +11,47 @@ const baseProps = {
 beforeEach(() => jest.clearAllMocks())
 
 describe('PhotoPreview', () => {
-  it('shows the photo and action buttons when a URI is provided', () => {
-    const { getByLabelText } = render(<PhotoPreview {...baseProps} />)
+  it('shows the photo and action buttons when a URI is provided', async () => {
+    const { getByLabelText } = await render(<PhotoPreview {...baseProps} />)
 
     expect(getByLabelText('Selected photo preview')).toBeTruthy()
     expect(getByLabelText('Use photo')).toBeTruthy()
     expect(getByLabelText('Back')).toBeTruthy()
   })
 
-  it('is not visible when uri is null', () => {
-    const { queryByLabelText } = render(<PhotoPreview {...baseProps} uri={null} />)
+  it('is not visible when uri is null', async () => {
+    const { queryByLabelText } = await render(<PhotoPreview {...baseProps} uri={null} />)
 
     expect(queryByLabelText('Use photo')).toBeNull()
   })
 
-  it('calls onConfirm when Use photo is pressed', () => {
+  it('calls onConfirm when Use photo is pressed', async () => {
     const onConfirm = jest.fn()
-    const { getByLabelText } = render(<PhotoPreview {...baseProps} onConfirm={onConfirm} />)
+    const { getByLabelText } = await render(<PhotoPreview {...baseProps} onConfirm={onConfirm} />)
 
-    fireEvent.press(getByLabelText('Use photo'))
+    await fireEvent.press(getByLabelText('Use photo'))
 
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
-  it('calls onCancel when Back is pressed', () => {
+  it('calls onCancel when Back is pressed', async () => {
     const onCancel = jest.fn()
-    const { getByLabelText } = render(<PhotoPreview {...baseProps} onCancel={onCancel} />)
+    const { getByLabelText } = await render(<PhotoPreview {...baseProps} onCancel={onCancel} />)
 
-    fireEvent.press(getByLabelText('Back'))
+    await fireEvent.press(getByLabelText('Back'))
 
     expect(onCancel).toHaveBeenCalledTimes(1)
   })
 
-  it('shows Saving… and disables buttons while saving', () => {
+  it('shows Saving… and disables buttons while saving', async () => {
     const onConfirm = jest.fn()
     const onCancel = jest.fn()
-    const { getByLabelText } = render(
+    const { getByLabelText } = await render(
       <PhotoPreview {...baseProps} isSaving={true} onConfirm={onConfirm} onCancel={onCancel} />,
     )
 
-    fireEvent.press(getByLabelText('Use photo'))
-    fireEvent.press(getByLabelText('Back'))
+    await fireEvent.press(getByLabelText('Use photo'))
+    await fireEvent.press(getByLabelText('Back'))
 
     expect(onConfirm).not.toHaveBeenCalled()
     expect(onCancel).not.toHaveBeenCalled()

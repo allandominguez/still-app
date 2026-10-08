@@ -63,6 +63,7 @@ export function useNoteEditor(date: string, initialNoteText: string | null): Not
         trace('[useNoteEditor] unmount, nothing pending to flush', { date })
       }
     }
+    // Mount-time date is correct: DayDetailPage is keyed by date, so a mounted editor never changes it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

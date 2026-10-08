@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      # One PR per SDK-aligned bump; expo-doctor in CI flags versions Expo hasn't curated.
+      expo-sdk:
+        patterns: ['expo*', 'react-native*', 'jest-expo']
+    ignore:
+      # Exact-pinned by Expo SDK curation; only `expo install --fix` should move these.
+      - dependency-name: 'react'
+      - dependency-name: 'react-native'
+      - dependency-name: '@types/react'
+      # jest-expo hard-pins Jest 29 and its matching types.
+      - dependency-name: 'jest'
+      - dependency-name: '@types/jest'
+      # Exact peer of react-native, so it moves with the SDK.
+      - dependency-name: '@react-native/jest-preset'
+      # Must track the React minor (1.2 for React 19.2); a newer line breaks the peer range.
+      - dependency-name: 'test-renderer'
+        update-types: ['version-update:semver-minor', 'version-update:semver-major']
+      - dependency-name: 'typescript'
+      # eslint-plugin-react doesn't support ESLint 10 yet; temporary.
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']

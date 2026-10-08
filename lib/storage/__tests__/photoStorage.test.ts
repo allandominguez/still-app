@@ -48,12 +48,8 @@ jest.mock('expo-image-manipulator', () => ({
   SaveFormat: { JPEG: 'jpeg' },
 }))
 
-jest.mock('react-native', () => ({
-  Image: { getSize: jest.fn() },
-}))
-
 function mockImageSize(width: number, height: number) {
-  ;(Image.getSize as jest.Mock).mockImplementation(
+  ;(jest.spyOn(Image, 'getSize') as unknown as jest.Mock).mockImplementation(
     (_uri: string, success: (w: number, h: number) => void) => success(width, height),
   )
 }

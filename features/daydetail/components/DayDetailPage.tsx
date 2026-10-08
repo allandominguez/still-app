@@ -1,5 +1,6 @@
+import { BlurTargetView } from 'expo-blur'
 import { useRef, useState } from 'react'
-import { Image, Pressable, StyleSheet } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import { formatDateAccessibilityLabel } from '../../../lib/dates'
 import { useDeletePhoto } from '../../../lib/hooks/useDeletePhoto'
 import { trace } from '../../../lib/logging/trace'
@@ -42,6 +43,7 @@ export function DayDetailPage({
 
   // Consumes exactly one press after a note blur so it doesn't also toggle the overlay; self-clears next tick.
   const wasEditingRef = useRef(false)
+  const blurTargetRef = useRef<View>(null)
   const handleNoteBlur = () => {
     wasEditingRef.current = true
     noteEditor.onBlur()
@@ -80,16 +82,18 @@ export function DayDetailPage({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
     >
-      <Image
-        source={{ uri: entry.photo_path! }}
-        style={styles.photo}
-        resizeMode="contain"
-        accessibilityLabel={`Photo from ${formatDateAccessibilityLabel(entry.date)}`}
-        accessibilityRole="image"
-        // Correlates a black-screen report with a stale photo_path — see useDayDetailFeed.
-        onError={() => trace('[DayDetailPage] image failed to load', { date: entry.date })}
-      />
-      <PageBlur visible={!revealed} />
+      <BlurTargetView ref={blurTargetRef} style={styles.photo}>
+        <Image
+          source={{ uri: entry.photo_path! }}
+          style={styles.photo}
+          resizeMode="contain"
+          accessibilityLabel={`Photo from ${formatDateAccessibilityLabel(entry.date)}`}
+          accessibilityRole="image"
+          // Correlates a black-screen report with a stale photo_path — see useDayDetailFeed.
+          onError={() => trace('[DayDetailPage] image failed to load', { date: entry.date })}
+        />
+      </BlurTargetView>
+      <PageBlur visible={!revealed} blurTarget={blurTargetRef} />
       {isFocused && (
         <DateOverlay
           label={formatDateOverlayLabel(entry.date)}

@@ -28,7 +28,7 @@ describe('useDeletePhoto', () => {
   it('prompts for confirmation before deleting anything', async () => {
     const alertSpy = simulateAlert('Cancel')
     const onDeleted = jest.fn()
-    const { result } = renderHook(() =>
+    const { result } = await renderHook(() =>
       useDeletePhoto('2026-06-08', 'file://documents/photos/2026-06-08.jpg', onDeleted),
     )
 
@@ -46,7 +46,7 @@ describe('useDeletePhoto', () => {
   it('deletes nothing and does not notify when the user cancels', async () => {
     simulateAlert('Cancel')
     const onDeleted = jest.fn()
-    const { result } = renderHook(() =>
+    const { result } = await renderHook(() =>
       useDeletePhoto('2026-06-08', 'file://documents/photos/2026-06-08.jpg', onDeleted),
     )
 
@@ -62,7 +62,7 @@ describe('useDeletePhoto', () => {
   it('deletes the photo file and clears the day entry when confirmed', async () => {
     simulateAlert('Delete')
     const onDeleted = jest.fn()
-    const { result } = renderHook(() =>
+    const { result } = await renderHook(() =>
       useDeletePhoto('2026-06-08', 'file://documents/photos/2026-06-08.jpg', onDeleted),
     )
 
@@ -77,7 +77,7 @@ describe('useDeletePhoto', () => {
   it('notifies via onDeleted once the delete completes', async () => {
     simulateAlert('Delete')
     const onDeleted = jest.fn()
-    const { result } = renderHook(() =>
+    const { result } = await renderHook(() =>
       useDeletePhoto('2026-06-08', 'file://documents/photos/2026-06-08.jpg', onDeleted),
     )
 

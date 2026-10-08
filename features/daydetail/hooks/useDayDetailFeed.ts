@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { trace } from '../../../lib/logging/trace'
 import { DayEntry, getAllDays } from '../../../lib/repositories/day'
 
@@ -45,10 +45,11 @@ export function useDayDetailFeed(initialDate: string): DayDetailFeed {
     return () => {
       cancelled = true
     }
+    // Refetch only on retry: initialDate is read just for logging, and the fetch loads every day.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt])
 
-  const retry = useCallback(() => setAttempt((n) => n + 1), [])
+  const retry = () => setAttempt((n) => n + 1)
 
   const resolvedIndex = entries.findIndex((entry) => entry.date === initialDate)
   const initialIndex = resolvedIndex === -1 ? 0 : resolvedIndex

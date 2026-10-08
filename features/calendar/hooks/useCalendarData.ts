@@ -39,19 +39,21 @@ export function useCalendarData(): CalendarData {
     return () => subscription.remove()
   }, [load])
 
+  // Stable identity matters more than the cost: it's the FlatList's extraData, so a new object
+  // every render would re-render every mounted cell.
   const entriesByDate = useMemo(
     () => Object.fromEntries(entries.map((e) => [e.date, e])),
     [entries],
   )
 
-  const photoDates = useMemo(
-    () => entries.filter((e) => e.photo_path).map((e) => e.date),
-    [entries],
-  )
-
+  // The one derived value with a real cost (~1 ms per 1,000 entries on a desktop engine), so cache it.
   const { currentStreak, longestStreak } = useMemo(
-    () => computeStreaks(photoDates, today),
-    [photoDates, today],
+    () =>
+      computeStreaks(
+        entries.filter((e) => e.photo_path).map((e) => e.date),
+        today,
+      ),
+    [entries, today],
   )
 
   const months = useMemo(() => {
