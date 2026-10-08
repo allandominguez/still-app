@@ -55,6 +55,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage",
     "test:watch": "jest --watchAll",
     "prepare": "husky"
   },
@@ -71,7 +72,42 @@
     ]
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "collectCoverageFrom": [
+      "App.tsx",
+      "index.ts",
+      "features/**/*.{ts,tsx}",
+      "lib/**/*.{ts,tsx}",
+      "navigation/**/*.{ts,tsx}",
+      "!**/__tests__/**",
+      "!**/*.d.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 90,
+        "branches": 85,
+        "functions": 85,
+        "lines": 90
+      },
+      "./lib/repositories/": {
+        "statements": 90,
+        "branches": 80,
+        "functions": 90,
+        "lines": 90
+      },
+      "./lib/storage/": {
+        "statements": 90,
+        "branches": 80,
+        "functions": 90,
+        "lines": 90
+      },
+      "./lib/db/": {
+        "statements": 90,
+        "branches": 80,
+        "functions": 90,
+        "lines": 90
+      }
+    }
   },
   "private": true
 }

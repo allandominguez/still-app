@@ -55,4 +55,5 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-      - run: npm test
+      # Same as `npm test` plus the coverage floors in package.json's jest config.
+      - run: npm run test:coverage

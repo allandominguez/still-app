@@ -37,7 +37,7 @@ Don't build for a requirement you don't have yet. Three similar lines of code ar
 
 **In this repo right now:** the mocks sit at real boundaries — the repository and photo-storage modules, and the device APIs (`expo-sqlite`, `expo-image-picker`, `expo-location`, `expo-file-system`, `expo-image-manipulator`). Test names read as scenarios (`useNoteEditor`: "resets the debounce on each keystroke rather than saving early"). One deliberate exception: `features/calendar/__tests__/streaks.test.ts` mocks the sibling `utils` module to stub the clock. It exists as a wiring guard against a past timezone bug (the default "today" must keep delegating to the local-date helper, not a UTC one-liner), and the helper's own correctness is tested separately in `utils.test.ts`.
 
-Coverage is measured but not enforced in CI. The standing target is 80% overall and 90%+ for repositories and hooks. As of 2026-10-08: 94.8% of statements and 90.3% of branches overall; repositories at 100%; hooks at 94.5% of statements but 86.7% of branches, which is just under the target. These are a dated snapshot — re-run `npx jest --coverage` for the current figures.
+Coverage is enforced in CI (`npm run test:coverage`): an overall floor for the whole app, plus a stricter one for the data layer — repositories, database setup and migrations, and photo storage — because a bug there loses a user's photos or notes rather than just misrendering something. The floors in `package.json`'s Jest config are the source of truth; they sit just under current levels so a regression fails the build, and get raised as coverage improves.
 
 ## Professional practices (not tied to a named principle)
 
