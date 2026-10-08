@@ -1,7 +1,7 @@
 # still
 
-[![Lint](https://github.com/allandominguez/still-app/actions/workflows/lint.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/lint.yml)
-[![Test](https://github.com/allandominguez/still-app/actions/workflows/test.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/test.yml)
+[![CI](https://github.com/allandominguez/still-app/actions/workflows/ci.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/allandominguez/still-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/codeql.yml)
 
 > **Status:** 🚧 Active development — core capture-to-calendar flow (photo capture, calendar view, day detail, text notes) is built and working end-to-end on a personal test device. Reminders, settings, and backup are still to come.
 
@@ -34,11 +34,11 @@ A private, local-first daily photo journal. Capture one moment per day, with an 
 
 **Mobile:**
 
-- React Native (Expo ~54)
+- React Native (Expo SDK 57)
 - TypeScript (strict mode)
 - React Navigation
 - SQLite via `expo-sqlite`
-- Secure credential storage via `expo-secure-store`
+- Secure credential storage via `expo-secure-store` (planned — arrives with Drive backup)
 
 **Sync service:** (planned — not yet developed)
 
@@ -51,8 +51,12 @@ A private, local-first daily photo journal. Capture one moment per day, with an 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or v20 (LTS)
+- [Node.js](https://nodejs.org/) 22.13+ (Node 24 LTS recommended — see [`.nvmrc`](.nvmrc); this is what CI runs)
 - [Expo Go](https://expo.dev/go) on your Android device, or a connected Android device with USB debugging enabled
+
+### Node version
+
+The repo pins Node via [`.nvmrc`](.nvmrc), and CI reads that same file. With [fnm](https://github.com/Schniz/fnm), `cd`-ing into the project selects the pinned version automatically (`brew install fnm`, add `eval "$(fnm env --use-on-cd)"` to your shell profile, then `fnm install`). [`nvm`](https://github.com/nvm-sh/nvm) works too, without the auto-switch.
 
 ### Installation
 
@@ -107,12 +111,24 @@ still-app/
 ## Development
 
 ```bash
-npm run lint       # ESLint on .ts/.tsx
-npm run typecheck  # tsc --noEmit
-npm test           # Jest
+npm run lint           # ESLint on .ts/.tsx
+npm run typecheck      # tsc --noEmit
+npm test               # Jest
+npm run test:coverage  # Jest with the coverage floors CI enforces
+npm run test:watch     # Jest in watch mode
+npm run format         # Prettier
 ```
 
-Pre-commit hooks run gitleaks (secrets scanning) and lint-staged (ESLint --fix, Prettier) on staged files.
+These run on every pull request and on pushes to `main` via [GitHub Actions](.github/workflows/ci.yml), alongside `expo-doctor` and CodeQL, and passing checks are required to merge. Pre-commit hooks run gitleaks (secrets scanning) and lint-staged (ESLint --fix, Prettier) on staged files.
+
+---
+
+## Architecture & Maintenance
+
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — the engineering principles this app is built on, with their sources and where each is practiced in the code
+- [`AGENTS.md`](AGENTS.md) — codebase layout, commands and conventions, for developers and AI coding agents
+- [`MAINTENANCE.md`](MAINTENANCE.md) — runbook for recurring situations (Expo upgrades, Dependabot, release builds)
+- [`SECURITY.md`](SECURITY.md) — how to report a vulnerability, and known accepted dependency findings
 
 ---
 
