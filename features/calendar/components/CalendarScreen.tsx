@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     minHeight: 18 + Spacing.md * 2,
   },
   footerLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

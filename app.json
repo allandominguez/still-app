@@ -44,7 +44,8 @@
           "locationWhenInUsePermission": "still uses your location when no GPS data is in the photo."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-status-bar"
     ]
   }
 }

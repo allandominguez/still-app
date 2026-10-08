@@ -28,7 +28,7 @@ export function PageBlur({ visible }: Props) {
         intensity={100}
         tint="dark"
         experimentalBlurMethod="dimezisBlurView"
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
       />
     </Animated.View>
   )
@@ -36,6 +36,6 @@ export function PageBlur({ visible }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 })
