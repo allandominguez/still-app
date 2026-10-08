@@ -70,16 +70,5 @@
   "jest": {
     "preset": "jest-expo"
   },
-  "overrides": {
-    "undici": ">=6.27.0",
-    "js-yaml": ">=5.2.2",
-    "form-data": ">=4.0.6",
-    "tar": ">=7.5.19",
-    "shell-quote": ">=1.9.0",
-    "brace-expansion@1.1.15": "1.1.16",
-    "brace-expansion@5.0.7": "5.0.8",
-    "postcss": ">=8.5.12",
-    "uuid": ">=11.1.1"
-  },
   "private": true
 }
