@@ -19,39 +19,39 @@ function viewableItem(index: number): ViewToken {
 }
 
 describe('useMonthPager', () => {
-  it('starts viewing the current month, the last item in the ascending list', () => {
-    const { result } = renderHook(() => useMonthPager(MONTHS))
+  it('starts viewing the current month, the last item in the ascending list', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
 
     expect(result.current.currentIndex).toBe(MONTHS.length - 1)
   })
 
-  it('tracks the current index as a different month becomes the viewable page', () => {
-    const { result } = renderHook(() => useMonthPager(MONTHS))
+  it('tracks the current index as a different month becomes the viewable page', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
 
-    act(() => {
+    await act(() => {
       result.current.onViewableItemsChanged({ viewableItems: [viewableItem(0)] })
     })
 
     expect(result.current.currentIndex).toBe(0)
   })
 
-  it('returns to the current month index after viewing a past month and swiping back', () => {
-    const { result } = renderHook(() => useMonthPager(MONTHS))
+  it('returns to the current month index after viewing a past month and swiping back', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
 
-    act(() => {
+    await act(() => {
       result.current.onViewableItemsChanged({ viewableItems: [viewableItem(0)] })
     })
-    act(() => {
+    await act(() => {
       result.current.onViewableItemsChanged({ viewableItems: [viewableItem(MONTHS.length - 1)] })
     })
 
     expect(result.current.currentIndex).toBe(MONTHS.length - 1)
   })
 
-  it('reports the page height once the container reports its layout', () => {
-    const { result } = renderHook(() => useMonthPager(MONTHS))
+  it('reports the page height once the container reports its layout', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
 
-    act(() => {
+    await act(() => {
       result.current.setPageHeight(812)
     })
 

@@ -49,7 +49,7 @@ describe('DayDetailScreen', () => {
   })
 
   async function renderScreen(overrides: Partial<Props> = {}) {
-    const result = render(<DayDetailScreen {...makeProps(overrides)} />)
+    const result = await render(<DayDetailScreen {...makeProps(overrides)} />)
     // Flush the getAllDays() microtask so no state update lands after the test ends.
     await act(async () => {
       await Promise.resolve()
@@ -65,7 +65,7 @@ describe('DayDetailScreen', () => {
   it('shows the close control once the date overlay clears', async () => {
     await renderScreen()
 
-    act(() => {
+    await act(() => {
       jest.advanceTimersByTime(1700)
     })
 
@@ -76,10 +76,10 @@ describe('DayDetailScreen', () => {
     const goBack = jest.fn()
     await renderScreen({ navigation: { goBack } as unknown as Props['navigation'] })
 
-    act(() => {
+    await act(() => {
       jest.advanceTimersByTime(1700)
     })
-    fireEvent.press(screen.getByLabelText('Back'))
+    await fireEvent.press(screen.getByLabelText('Back'))
 
     expect(goBack).toHaveBeenCalledTimes(1)
   })
@@ -91,10 +91,10 @@ describe('DayDetailScreen', () => {
       navigation: { goBack } as unknown as Props['navigation'],
     })
 
-    fireEvent(getByTestId('day-detail-container'), 'layout', {
+    await fireEvent(getByTestId('day-detail-container'), 'layout', {
       nativeEvent: { layout: { height: 800 } },
     })
-    fireEvent.press(screen.getByLabelText('Simulate photo deleted'))
+    await fireEvent.press(screen.getByLabelText('Simulate photo deleted'))
 
     expect(goBack).toHaveBeenCalledTimes(1)
   })
@@ -118,7 +118,7 @@ describe('DayDetailScreen', () => {
     expect(screen.getByLabelText('Retry loading day')).toBeTruthy()
 
     await act(async () => {
-      fireEvent.press(screen.getByLabelText('Retry loading day'))
+      await fireEvent.press(screen.getByLabelText('Retry loading day'))
       await Promise.resolve()
     })
 

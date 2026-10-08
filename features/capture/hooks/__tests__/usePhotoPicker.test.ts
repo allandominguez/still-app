@@ -48,25 +48,25 @@ describe('usePhotoPicker', () => {
     mockReverseGeocode.mockResolvedValue(null)
   })
 
-  it('sheet is hidden and no pending photo initially', () => {
-    const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+  it('sheet is hidden and no pending photo initially', async () => {
+    const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
     expect(result.current.sheetVisible).toBe(false)
     expect(result.current.pendingUri).toBeNull()
   })
 
-  it('openSheet makes the sheet visible', () => {
-    const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+  it('openSheet makes the sheet visible', async () => {
+    const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
-    act(() => result.current.openSheet())
+    await act(() => result.current.openSheet())
 
     expect(result.current.sheetVisible).toBe(true)
   })
 
-  it('onDismiss hides the sheet', () => {
-    const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+  it('onDismiss hides the sheet', async () => {
+    const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
-    act(() => result.current.openSheet())
-    act(() => result.current.sheetProps.onDismiss())
+    await act(() => result.current.openSheet())
+    await act(() => result.current.sheetProps.onDismiss())
 
     expect(result.current.sheetVisible).toBe(false)
   })
@@ -81,7 +81,7 @@ describe('usePhotoPicker', () => {
       mockExtractGpsFromExif.mockReturnValue(GPS)
       mockSavePhoto.mockResolvedValue('file://documents/photos/123.jpg')
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -107,7 +107,7 @@ describe('usePhotoPicker', () => {
       mockSavePhoto.mockResolvedValue('file://documents/photos/123.jpg')
       mockReverseGeocode.mockResolvedValue('Mission District')
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -128,7 +128,7 @@ describe('usePhotoPicker', () => {
       mockSavePhoto.mockResolvedValue('file://documents/photos/123.jpg')
       mockGetDeviceLocation.mockResolvedValue(GPS)
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -152,7 +152,7 @@ describe('usePhotoPicker', () => {
       mockSavePhoto.mockResolvedValue('file://documents/photos/123.jpg')
       mockGetDeviceLocation.mockResolvedValue(null)
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -171,7 +171,7 @@ describe('usePhotoPicker', () => {
       mockRequestCameraPermission.mockResolvedValue('granted')
       mockLaunchCameraAsync.mockResolvedValue({ canceled: true, assets: null })
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -183,7 +183,7 @@ describe('usePhotoPicker', () => {
 
     it('does not launch the camera when permission is denied', async () => {
       mockRequestCameraPermission.mockResolvedValue('denied')
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -194,7 +194,7 @@ describe('usePhotoPicker', () => {
 
     it('sets permissionBlocked when camera permission is permanently denied', async () => {
       mockRequestCameraPermission.mockResolvedValue('blocked')
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
@@ -206,9 +206,9 @@ describe('usePhotoPicker', () => {
     it('closes the sheet before launching the camera then re-opens it if the user cancels', async () => {
       mockRequestCameraPermission.mockResolvedValue('granted')
       mockLaunchCameraAsync.mockResolvedValue({ canceled: true, assets: null })
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
-      act(() => result.current.openSheet())
+      await act(() => result.current.openSheet())
       await act(async () => {
         await result.current.sheetProps.onTakePhoto()
       })
@@ -224,9 +224,9 @@ describe('usePhotoPicker', () => {
       })
       let resolveSave!: (path: string) => void
       mockSavePhoto.mockReturnValue(new Promise<string>((res) => (resolveSave = res)))
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
-      act(() => {
+      await act(() => {
         result.current.sheetProps.onTakePhoto()
       })
       await act(async () => {})
@@ -246,7 +246,7 @@ describe('usePhotoPicker', () => {
         canceled: false,
         assets: [{ uri: 'content://gallery/photo.jpg', exif: undefined }],
       })
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -265,7 +265,7 @@ describe('usePhotoPicker', () => {
       mockExtractGpsFromExif.mockReturnValue(GPS)
       mockSavePhoto.mockResolvedValue('file://documents/photos/456.jpg')
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -293,12 +293,12 @@ describe('usePhotoPicker', () => {
       })
       let resolveSave!: (path: string) => void
       mockSavePhoto.mockReturnValue(new Promise<string>((res) => (resolveSave = res)))
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
       })
-      act(() => {
+      await act(() => {
         result.current.onConfirmPhoto()
       })
       await act(async () => {})
@@ -322,7 +322,7 @@ describe('usePhotoPicker', () => {
           canceled: false,
           assets: [{ uri: 'content://gallery/second.jpg', exif: undefined }],
         })
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -338,7 +338,7 @@ describe('usePhotoPicker', () => {
     it('re-opens the sheet when the user closes the gallery without selecting a photo', async () => {
       mockRequestMediaLibraryPermission.mockResolvedValue('granted')
       mockLaunchImageLibraryAsync.mockResolvedValue({ canceled: true, assets: null })
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -357,7 +357,7 @@ describe('usePhotoPicker', () => {
         })
         .mockResolvedValueOnce({ canceled: true, assets: null })
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -380,7 +380,7 @@ describe('usePhotoPicker', () => {
       })
       mockSavePhoto.mockResolvedValue('file://documents/photos/456.jpg')
       const onCaptureComplete = jest.fn()
-      const { result } = renderHook(() => usePhotoPicker(onCaptureComplete))
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -397,7 +397,7 @@ describe('usePhotoPicker', () => {
 
     it('does not launch the gallery when permission is denied', async () => {
       mockRequestMediaLibraryPermission.mockResolvedValue('denied')
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()
@@ -408,7 +408,7 @@ describe('usePhotoPicker', () => {
 
     it('sets permissionBlocked when media library permission is permanently denied', async () => {
       mockRequestMediaLibraryPermission.mockResolvedValue('blocked')
-      const { result } = renderHook(() => usePhotoPicker(jest.fn()))
+      const { result } = await renderHook(() => usePhotoPicker(jest.fn()))
 
       await act(async () => {
         await result.current.sheetProps.onChooseFromGallery()

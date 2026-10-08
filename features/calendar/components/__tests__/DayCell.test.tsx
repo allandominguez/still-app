@@ -18,13 +18,13 @@ function makeCell(overrides: Partial<CalendarDayData> = {}): CalendarDayData {
 }
 
 describe('DayCell', () => {
-  it('renders the day number', () => {
-    render(<DayCell cell={makeCell()} size={SIZE} onPress={noop} onLongPress={noop} />)
+  it('renders the day number', async () => {
+    await render(<DayCell cell={makeCell()} size={SIZE} onPress={noop} onLongPress={noop} />)
     expect(screen.getByText('14')).toBeTruthy()
   })
 
-  it('shows an accent dot when the day has a photo', () => {
-    render(
+  it('shows an accent dot when the day has a photo', async () => {
+    await render(
       <DayCell
         cell={makeCell({ hasPhoto: true, accentColor: '#4A90E2' })}
         size={SIZE}
@@ -35,14 +35,14 @@ describe('DayCell', () => {
     expect(screen.getByTestId('photo-dot')).toBeTruthy()
   })
 
-  it('does not show a dot when the day has no photo', () => {
-    render(<DayCell cell={makeCell()} size={SIZE} onPress={noop} onLongPress={noop} />)
+  it('does not show a dot when the day has no photo', async () => {
+    await render(<DayCell cell={makeCell()} size={SIZE} onPress={noop} onLongPress={noop} />)
     expect(screen.queryByTestId('photo-dot')).toBeNull()
   })
 
-  it('calls onPress with the date when a photo day is pressed', () => {
+  it('calls onPress with the date when a photo day is pressed', async () => {
     const onPress = jest.fn()
-    render(
+    await render(
       <DayCell
         cell={makeCell({ hasPhoto: true, accentColor: '#4A90E2' })}
         size={SIZE}
@@ -50,13 +50,13 @@ describe('DayCell', () => {
         onLongPress={noop}
       />,
     )
-    fireEvent.press(screen.getByRole('button'))
+    await fireEvent.press(screen.getByRole('button'))
     expect(onPress).toHaveBeenCalledWith('2026-07-14')
   })
 
-  it('calls onLongPress with the date when a photo day is long-pressed', () => {
+  it('calls onLongPress with the date when a photo day is long-pressed', async () => {
     const onLongPress = jest.fn()
-    render(
+    await render(
       <DayCell
         cell={makeCell({ hasPhoto: true, accentColor: '#4A90E2' })}
         size={SIZE}
@@ -64,19 +64,19 @@ describe('DayCell', () => {
         onLongPress={onLongPress}
       />,
     )
-    fireEvent(screen.getByRole('button'), 'longPress')
+    await fireEvent(screen.getByRole('button'), 'longPress')
     expect(onLongPress).toHaveBeenCalledWith('2026-07-14')
   })
 
-  it('is pressable when the day has no photo but is not in the future', () => {
+  it('is pressable when the day has no photo but is not in the future', async () => {
     const onPress = jest.fn()
-    render(<DayCell cell={makeCell()} size={SIZE} onPress={onPress} onLongPress={noop} />)
-    fireEvent.press(screen.getByRole('button'))
+    await render(<DayCell cell={makeCell()} size={SIZE} onPress={onPress} onLongPress={noop} />)
+    await fireEvent.press(screen.getByRole('button'))
     expect(onPress).toHaveBeenCalledWith('2026-07-14')
   })
 
-  it('renders future days with reduced visual emphasis', () => {
-    const { getByText } = render(
+  it('renders future days with reduced visual emphasis', async () => {
+    const { getByText } = await render(
       <DayCell cell={makeCell({ isFuture: true })} size={SIZE} onPress={noop} onLongPress={noop} />,
     )
     // Future days are not interactive — no button role
@@ -85,8 +85,8 @@ describe('DayCell', () => {
     expect(getByText('14')).toBeTruthy()
   })
 
-  it('renders nothing for an empty leading cell', () => {
-    render(
+  it('renders nothing for an empty leading cell', async () => {
+    await render(
       <DayCell
         cell={{
           date: null,

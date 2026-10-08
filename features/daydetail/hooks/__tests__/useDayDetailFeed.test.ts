@@ -19,7 +19,7 @@ describe('useDayDetailFeed', () => {
       { date: '2026-06-06', photo_path: '/c.jpg' },
     ])
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-06-08'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-08'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.entries.map((e) => e.date)).toEqual(['2026-06-06', '2026-06-08'])
@@ -32,7 +32,7 @@ describe('useDayDetailFeed', () => {
       { date: '2026-06-07', photo_path: '/c.jpg' },
     ])
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-06-06'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-06'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.entries.map((e) => e.date)).toEqual([
@@ -49,7 +49,7 @@ describe('useDayDetailFeed', () => {
       { date: '2026-06-08', photo_path: '/c.jpg' },
     ])
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-06-07'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-07'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.initialIndex).toBe(1)
@@ -58,7 +58,7 @@ describe('useDayDetailFeed', () => {
   it('falls back to the first entry when the tapped date is not in the feed', async () => {
     mockGetAllDays.mockResolvedValue([{ date: '2026-06-06', photo_path: '/a.jpg' }])
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-01-01'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-01-01'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.initialIndex).toBe(0)
@@ -67,7 +67,7 @@ describe('useDayDetailFeed', () => {
   it('surfaces an error instead of hanging when the fetch rejects', async () => {
     mockGetAllDays.mockRejectedValue(new Error('SQLITE_BUSY'))
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-06-08'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-08'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.error).toBe(true)
@@ -78,10 +78,10 @@ describe('useDayDetailFeed', () => {
     mockGetAllDays.mockRejectedValueOnce(new Error('SQLITE_BUSY'))
     mockGetAllDays.mockResolvedValueOnce([{ date: '2026-06-08', photo_path: '/a.jpg' }])
 
-    const { result } = renderHook(() => useDayDetailFeed('2026-06-08'))
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-08'))
     await waitFor(() => expect(result.current.error).toBe(true))
 
-    act(() => result.current.retry())
+    await act(() => result.current.retry())
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.error).toBe(false)

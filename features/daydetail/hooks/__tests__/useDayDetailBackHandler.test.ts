@@ -24,9 +24,9 @@ describe('useDayDetailBackHandler', () => {
     addEventListenerSpy.mockRestore()
   })
 
-  it('closes the detail overlay and consumes the press when it is open', () => {
+  it('closes the detail overlay and consumes the press when it is open', async () => {
     const closeDetailOverlay = jest.fn()
-    renderHook(() => useDayDetailBackHandler(true, closeDetailOverlay))
+    await renderHook(() => useDayDetailBackHandler(true, closeDetailOverlay))
 
     expect(addEventListenerSpy).toHaveBeenCalledWith('hardwareBackPress', expect.any(Function))
 
@@ -36,9 +36,9 @@ describe('useDayDetailBackHandler', () => {
     expect(consumed).toBe(true)
   })
 
-  it('lets the default back action proceed when the detail overlay is closed', () => {
+  it('lets the default back action proceed when the detail overlay is closed', async () => {
     const closeDetailOverlay = jest.fn()
-    renderHook(() => useDayDetailBackHandler(false, closeDetailOverlay))
+    await renderHook(() => useDayDetailBackHandler(false, closeDetailOverlay))
 
     const consumed = pressHardwareBack(addEventListenerSpy)
 
@@ -46,10 +46,10 @@ describe('useDayDetailBackHandler', () => {
     expect(consumed).toBe(false)
   })
 
-  it('removes the listener on unmount', () => {
-    const { unmount } = renderHook(() => useDayDetailBackHandler(false, jest.fn()))
+  it('removes the listener on unmount', async () => {
+    const { unmount } = await renderHook(() => useDayDetailBackHandler(false, jest.fn()))
 
-    unmount()
+    await unmount()
 
     expect(mockRemove).toHaveBeenCalledTimes(1)
   })

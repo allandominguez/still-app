@@ -15,7 +15,7 @@ describe('useCapturePermissions', () => {
   describe('requestCameraPermission', () => {
     it('returns granted when permission is granted', async () => {
       mockRequestCamera.mockResolvedValue({ granted: true, canAskAgain: true })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {
@@ -27,7 +27,7 @@ describe('useCapturePermissions', () => {
 
     it('returns denied when permission is refused but can be asked again', async () => {
       mockRequestCamera.mockResolvedValue({ granted: false, canAskAgain: true })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {
@@ -39,7 +39,7 @@ describe('useCapturePermissions', () => {
 
     it('returns blocked when permission is permanently denied', async () => {
       mockRequestCamera.mockResolvedValue({ granted: false, canAskAgain: false })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {
@@ -53,7 +53,7 @@ describe('useCapturePermissions', () => {
   describe('requestMediaLibraryPermission', () => {
     it('returns granted when permission is granted', async () => {
       mockRequestMedia.mockResolvedValue({ granted: true, canAskAgain: true })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {
@@ -65,7 +65,7 @@ describe('useCapturePermissions', () => {
 
     it('returns denied when permission is refused but can be asked again', async () => {
       mockRequestMedia.mockResolvedValue({ granted: false, canAskAgain: true })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {
@@ -77,7 +77,7 @@ describe('useCapturePermissions', () => {
 
     it('returns blocked when permission is permanently denied', async () => {
       mockRequestMedia.mockResolvedValue({ granted: false, canAskAgain: false })
-      const { result } = renderHook(() => useCapturePermissions())
+      const { result } = await renderHook(() => useCapturePermissions())
 
       let status
       await act(async () => {

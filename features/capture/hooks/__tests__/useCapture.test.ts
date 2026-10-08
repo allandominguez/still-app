@@ -73,7 +73,7 @@ describe('useCapture', () => {
   describe('opening the sheet', () => {
     it('opens the sheet directly when the target date has no photo', async () => {
       const alertSpy = jest.spyOn(Alert, 'alert')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -86,7 +86,7 @@ describe('useCapture', () => {
     it('prompts for confirmation before opening when the target date already has a photo', async () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       const alertSpy = simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -103,7 +103,7 @@ describe('useCapture', () => {
     it('does not open the sheet when the user cancels the replacement prompt', async () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       simulateAlert('Cancel')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -115,7 +115,7 @@ describe('useCapture', () => {
     it('opens the sheet without re-prompting when called again for the same date after confirmation', async () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       const alertSpy = simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -132,12 +132,12 @@ describe('useCapture', () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       const alertSpy = jest.spyOn(Alert, 'alert')
       simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
       })
-      act(() => {
+      await act(() => {
         result.current.sheetProps.onDismiss()
       })
 
@@ -154,7 +154,7 @@ describe('useCapture', () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       const alertSpy = jest.spyOn(Alert, 'alert')
       simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -174,7 +174,7 @@ describe('useCapture', () => {
     it('does not delete the old photo until the capture is complete', async () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -186,7 +186,7 @@ describe('useCapture', () => {
     it('deletes the old photo and persists the new one when capture completes', async () => {
       mockGetDay.mockResolvedValue({ photo_path: 'file://documents/photos/old.jpg' })
       simulateAlert('Replace')
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -202,7 +202,7 @@ describe('useCapture', () => {
     })
 
     it('persists with EXIF coordinates and location name', async () => {
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -224,7 +224,7 @@ describe('useCapture', () => {
     })
 
     it('persists with device coordinates when EXIF GPS is absent', async () => {
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -249,7 +249,7 @@ describe('useCapture', () => {
     })
 
     it('persists with null coordinates when no GPS is available', async () => {
-      const { result } = renderHook(() => useCapture())
+      const { result } = await renderHook(() => useCapture())
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
@@ -271,7 +271,7 @@ describe('useCapture', () => {
 
     it('calls onSaved with the target date once the entry is persisted', async () => {
       const onSaved = jest.fn()
-      const { result } = renderHook(() => useCapture(onSaved))
+      const { result } = await renderHook(() => useCapture(onSaved))
 
       await act(async () => {
         await result.current.openSheet('2026-06-15')
