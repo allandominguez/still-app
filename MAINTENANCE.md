@@ -8,7 +8,7 @@ A runbook for situations that recur throughout a project's life — not one-time
 
 **Why it happens:** Dependabot resolves each package's latest semver-compatible version independently. It has no concept of Expo's SDK-curated version set — the specific combination of `react`, `react-native`, `jest-expo` and the other `expo-*` packages that a given SDK release expects and tests against. A bump that's individually valid semver can still break that set. That's why `dependabot.yml` permanently `ignore`s the packages whose versions the SDK owns (`react`, `react-native`, `@types/react`, `jest`, `@types/jest`, `@react-native/jest-preset`, `typescript`, and `test-renderer`'s minor and major lines) — only `expo install` should move them.
 
-**Fix:**
+**Fix:** First check the PR's diff. If it moves `expo` to a new major (57 → 58), stop: this fix doesn't apply. `expo install --fix` would try to undo the jump and abort with `ERESOLVE`. Follow "Upgrading the Expo SDK" below instead, and close the PR as superseded afterwards. If the bumps stay within the current SDK:
 
 ```bash
 git checkout <dependabot-branch>       # or main, if the PR was already closed
@@ -18,16 +18,35 @@ git commit -m "Align deps to Expo SDK's expected versions"
 git push
 ```
 
-Then let CI re-run and merge once green. If `expo install --fix` aborts with an `ERESOLVE` peer conflict (it did moving to SDK 57, over `@react-native/jest-preset`), install the packages named in the error explicitly, then re-run it.
+Then let CI re-run and merge once green.
 
 **This is the expected, recurring way these packages get updated** — each Expo SDK release re-curates the set, so this will keep happening.
+
+## `expo-doctor` fails with no code change
+
+**Symptom:** `expo-doctor` fails on `main`, or on a PR that changes no dependencies, listing patch mismatches (`expo-location` expected `~57.0.21`, found `57.0.20`). The weekly `Expo Doctor` run usually goes red first.
+
+**Why it happens:** The versions `expo-doctor` expects live on Expo's side and change whenever Expo publishes a patch release. The lockfile doesn't change with them, so `main` falls behind with no code change (it did on 2026-10-14, six days after a green run), and every PR fails the required `static-analysis` check until `main` is realigned. The PR check stays blocking on purpose: it stops a misaligned bump reaching `main`. The weekly run (Tuesdays, 00:13 UTC) flags drift before a PR hits it.
+
+**Fix:** Realign `main` on its own branch, always cut from `origin/main`:
+
+```bash
+git fetch origin
+git checkout -b chore/align-expo-patches origin/main
+npx expo install --fix
+npx expo-doctor                        # all checks should pass
+git add package.json package-lock.json
+git commit -m "Align deps to Expo SDK's expected versions"
+```
+
+Open a PR and merge it once green. Then rebase every blocked branch onto `main` (`@dependabot rebase` for Dependabot PRs), because branch protection requires them to be up to date. These are patch bumps within one SDK, so the risk is low. Before the next release build, open the app and check each native module the doctor output named.
 
 ## Upgrading the Expo SDK
 
 An SDK bump touches native modules, React, React Native, and the test toolchain at once, so it's worth doing the same way each time:
 
 1. **Check that Expo Go supports the target SDK first.** Day-to-day development runs in Expo Go on a physical phone, and the Play Store build lags new SDKs, sometimes by months. A project bumped ahead of it can't be tested on the device. The build installed directly from Expo has supported new SDKs sooner.
-2. **One major at a time, one commit per hop** (e.g. 56 → 57, not 54 → 57 in one go), so a breakage is attributable to a single SDK. Run `npx expo install expo@~<n>.0.0`, then `npx expo install --fix`, then `npx expo-doctor`.
+2. **One major at a time, one commit per hop** (e.g. 56 → 57, not 54 → 57 in one go), so a breakage is attributable to a single SDK. Run `npx expo install expo@~<n>.0.0`, then `npx expo install --fix`, then `npx expo-doctor`. If `--fix` aborts with an `ERESOLVE` peer conflict (it did moving to SDK 57, over `@react-native/jest-preset`), install the packages named in the error explicitly, then re-run it.
 3. **Run the checks, then the app.** Lint, typecheck, tests and a real Android bundle (`npx expo export --platform android`) catch most breakage. Two kinds are easy to miss: a removed API that doesn't crash but quietly stops doing anything at runtime (`StyleSheet.absoluteFillObject` went away in React Native 0.85; TypeScript flagged it, but spreading the missing property would otherwise have dropped the overlays' full-screen layout), and deprecation warnings that only log on a device (`expo-blur`'s prop rename). Treat typecheck errors as real, then open the app and read the console.
 4. **Re-run `npm audit` afterwards** and follow the next section; SDK bumps change the audit outcome.
 5. **Don't regenerate `android/` as a side effect.** See "Release builds" below.

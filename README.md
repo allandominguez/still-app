@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/allandominguez/still-app/actions/workflows/ci.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/allandominguez/still-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/codeql.yml)
+[![Expo Doctor](https://github.com/allandominguez/still-app/actions/workflows/expo-doctor.yml/badge.svg)](https://github.com/allandominguez/still-app/actions/workflows/expo-doctor.yml)
 
 > **Status:** 🚧 Active development — core capture-to-calendar flow (photo capture, calendar view, day detail, text notes) is built and working end-to-end on a personal test device. Reminders, settings, and backup are still to come.
 

@@ -1,0 +1,23 @@
+name: Expo Doctor
+
+# Scheduled so Expo's version drift shows up on main before a PR trips over it;
+# ci.yml still runs the same check on every PR.
+on:
+  schedule:
+    - cron: '13 0 * * 2'
+  workflow_dispatch:
+
+# Least privilege: no writes to the repo.
+permissions:
+  contents: read
+
+jobs:
+  version-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npx expo-doctor
