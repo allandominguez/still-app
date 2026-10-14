@@ -22,6 +22,24 @@ Then let CI re-run and merge once green. If `expo install --fix` aborts with an 
 
 **This is the expected, recurring way these packages get updated** — each Expo SDK release re-curates the set, so this will keep happening.
 
+## `expo-doctor` fails with no code change
+
+**Symptom:** `expo-doctor` fails on `main`, or on a PR that touches no dependencies, with "Check that packages match versions required by installed Expo SDK" and a list of patch mismatches (`expo-location` expected `~57.0.21`, found `57.0.20`). Usually the weekly `Expo Doctor` workflow goes red first.
+
+**Why it happens:** The versions `expo-doctor` expects come from Expo's side, not from this repo, and they move whenever Expo publishes a patch release within the SDK. The lockfile doesn't move with them, so it quietly falls behind, and every PR then fails the required `static-analysis` check until `main` catches up. This happened on 2026-10-14, a week after `main` had been green. The PR check and the weekly run (Tuesdays, 00:13 UTC) are both kept on purpose: the PR check stops a misaligned bump reaching `main`, and the weekly run shows drift between PRs.
+
+**Fix:** If Dependabot already has an open `expo-sdk` group PR, fix it there instead (see the previous entry): `expo install --fix` aligns the same packages. Otherwise:
+
+```bash
+git checkout -b chore/align-expo-patches main
+npx expo install --fix
+npx expo-doctor                        # should now pass
+git add package.json package-lock.json
+git commit -m "Align deps to Expo SDK's expected versions"
+```
+
+Open a PR and merge once green, then rebase any blocked feature branches onto `main` (branch protection requires them to be up to date). These are patch bumps inside one SDK, so the risk is low, but try `expo-location` or any other native module in the list on a device before the next release build.
+
 ## Upgrading the Expo SDK
 
 An SDK bump touches native modules, React, React Native, and the test toolchain at once, so it's worth doing the same way each time:
