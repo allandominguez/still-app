@@ -282,5 +282,17 @@ describe('useCapture', () => {
 
       expect(onSaved).toHaveBeenCalledWith('2026-06-15')
     })
+
+    it('ignores a completed capture when no day was chosen', async () => {
+      const onSaved = jest.fn()
+      await renderHook(() => useCapture(onSaved))
+
+      await act(async () => {
+        await capturedOnComplete!(RESULT)
+      })
+
+      expect(onSaved).not.toHaveBeenCalled()
+      expect(mockUpsertDayPhoto).not.toHaveBeenCalled()
+    })
   })
 })
