@@ -1,3 +1,5 @@
+import { migrations } from '../migrations'
+
 const mockExecAsync = jest.fn().mockResolvedValue(undefined)
 const mockGetFirstAsync = jest.fn().mockResolvedValue({ user_version: 999 })
 const mockGetAllAsync = jest.fn().mockResolvedValue([])
@@ -10,12 +12,20 @@ jest.mock('expo-sqlite', () => ({
   }),
 }))
 
+// __DEV__ is a global const to TypeScript, so reaching it as a property needs a cast.
+const globalWithDev = globalThis as unknown as { __DEV__: boolean }
+const originalDev = globalWithDev.__DEV__
+
 describe('openDatabase', () => {
   beforeEach(() => {
     jest.resetModules()
     mockExecAsync.mockClear()
     mockGetFirstAsync.mockClear()
     mockGetAllAsync.mockReset().mockResolvedValue([])
+  })
+
+  afterEach(() => {
+    globalWithDev.__DEV__ = originalDev
   })
 
   it('enables WAL mode and a busy timeout before applying migrations', async () => {
@@ -53,7 +63,11 @@ describe('openDatabase', () => {
     expect(walCalls).toHaveLength(1)
   })
 
-  it('serializes concurrent calls instead of letting them overlap', async () => {
+  it.each([
+    ['development', true],
+    ['a release build', false],
+  ])('serializes concurrent calls instead of letting them overlap in %s', async (_name, isDev) => {
+    globalWithDev.__DEV__ = isDev
     const order: string[] = []
     let resolveFirst!: () => void
 
@@ -87,5 +101,31 @@ describe('openDatabase', () => {
     await secondCall
 
     expect(order).toEqual(['first-start', 'first-end', 'second-start'])
+  })
+
+  it('failing query rejects for its caller, later query still resolves', async () => {
+    mockGetAllAsync.mockRejectedValueOnce(new Error('SQLITE_BUSY'))
+    mockGetAllAsync.mockResolvedValueOnce([{ id: 2 }])
+
+    const { openDatabase } = require('../database')
+    const database = await openDatabase()
+
+    const firstCall = database.getAllAsync('select 1')
+    const secondCall = database.getAllAsync('select 2')
+
+    await expect(firstCall).rejects.toThrow('SQLITE_BUSY')
+    await expect(secondCall).resolves.toEqual([{ id: 2 }])
+  })
+
+  it('treats a database with no version as new and applies every migration', async () => {
+    mockGetFirstAsync.mockResolvedValueOnce(null)
+
+    const { openDatabase } = require('../database')
+    await openDatabase()
+
+    const expected = migrations.flatMap((sql, i) => [sql, `PRAGMA user_version = ${i + 1}`])
+    const calls = mockExecAsync.mock.calls.map((call) => call[0])
+
+    expect(calls.slice(-expected.length)).toEqual(expected)
   })
 })
