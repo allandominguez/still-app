@@ -12,12 +12,20 @@ jest.mock('expo-sqlite', () => ({
   }),
 }))
 
+// __DEV__ is a global const to TypeScript, so reaching it as a property needs a cast.
+const globalWithDev = globalThis as unknown as { __DEV__: boolean }
+const originalDev = globalWithDev.__DEV__
+
 describe('openDatabase', () => {
   beforeEach(() => {
     jest.resetModules()
     mockExecAsync.mockClear()
     mockGetFirstAsync.mockClear()
     mockGetAllAsync.mockReset().mockResolvedValue([])
+  })
+
+  afterEach(() => {
+    globalWithDev.__DEV__ = originalDev
   })
 
   it('enables WAL mode and a busy timeout before applying migrations', async () => {
@@ -55,7 +63,11 @@ describe('openDatabase', () => {
     expect(walCalls).toHaveLength(1)
   })
 
-  it('serializes concurrent calls instead of letting them overlap', async () => {
+  it.each([
+    ['development', true],
+    ['a release build', false],
+  ])('serializes concurrent calls instead of letting them overlap in %s', async (_name, isDev) => {
+    globalWithDev.__DEV__ = isDev
     const order: string[] = []
     let resolveFirst!: () => void
 
