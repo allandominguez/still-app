@@ -1,3 +1,5 @@
+import { migrations } from '../migrations'
+
 const mockExecAsync = jest.fn().mockResolvedValue(undefined)
 const mockGetFirstAsync = jest.fn().mockResolvedValue({ user_version: 999 })
 const mockGetAllAsync = jest.fn().mockResolvedValue([])
@@ -87,5 +89,31 @@ describe('openDatabase', () => {
     await secondCall
 
     expect(order).toEqual(['first-start', 'first-end', 'second-start'])
+  })
+
+  it('failing query rejects for its caller, later query still resolves', async () => {
+    mockGetAllAsync.mockRejectedValueOnce(new Error('SQLITE_BUSY'))
+    mockGetAllAsync.mockResolvedValueOnce([{ id: 2 }])
+
+    const { openDatabase } = require('../database')
+    const database = await openDatabase()
+
+    const firstCall = database.getAllAsync('select 1')
+    const secondCall = database.getAllAsync('select 2')
+
+    await expect(firstCall).rejects.toThrow('SQLITE_BUSY')
+    await expect(secondCall).resolves.toEqual([{ id: 2 }])
+  })
+
+  it('treats a database with no version as new and applies every migration', async () => {
+    mockGetFirstAsync.mockResolvedValueOnce(null)
+
+    const { openDatabase } = require('../database')
+    await openDatabase()
+
+    const expected = migrations.flatMap((sql, i) => [sql, `PRAGMA user_version = ${i + 1}`])
+    const calls = mockExecAsync.mock.calls.map((call) => call[0])
+
+    expect(calls.slice(-expected.length)).toEqual(expected)
   })
 })
