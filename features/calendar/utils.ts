@@ -72,10 +72,15 @@ export function isHorizontalSwipe(dx: number, dy: number): boolean {
 }
 
 // Swipe right = newer month (higher index), swipe left = older month (lower index).
-export function monthSwipeTarget(dx: number, currentIndex: number): number | null {
-  if (dx > SWIPE_THRESHOLD) return currentIndex + 1
-  if (dx < -SWIPE_THRESHOLD) return currentIndex - 1
-  return null
+export function monthSwipeTarget(
+  dx: number,
+  currentIndex: number,
+  monthCount: number,
+): number | null {
+  const target =
+    dx > SWIPE_THRESHOLD ? currentIndex + 1 : dx < -SWIPE_THRESHOLD ? currentIndex - 1 : null
+  if (target === null || target < 0 || target >= monthCount) return null
+  return target
 }
 
 // Swipe right = newer year (year + 1), swipe left = older year (year - 1), same month.
