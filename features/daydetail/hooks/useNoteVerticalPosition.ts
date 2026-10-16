@@ -21,9 +21,12 @@ export function useNoteVerticalPosition(pageHeight: number): Animated.Value {
   const translateY = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
+    // Event wiring only; the shift logic is tested through computeKeyboardShift.
+    /* istanbul ignore next */
     const showSub = Keyboard.addListener('keyboardDidShow', (event: KeyboardEvent) =>
       setKeyboardHeight(event.endCoordinates.height),
     )
+    /* istanbul ignore next */
     const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0))
     return () => {
       showSub.remove()
