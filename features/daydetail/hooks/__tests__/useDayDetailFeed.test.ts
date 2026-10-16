@@ -87,4 +87,44 @@ describe('useDayDetailFeed', () => {
     expect(result.current.error).toBe(false)
     expect(result.current.entries.map((e) => e.date)).toEqual(['2026-06-08'])
   })
+
+  it('ignores a stale fetch that finishes after a retry has already loaded', async () => {
+    let resolveStale!: (days: unknown[]) => void
+    const stale = new Promise<unknown[]>((resolve) => {
+      resolveStale = resolve
+    })
+    mockGetAllDays.mockReturnValueOnce(stale)
+    mockGetAllDays.mockResolvedValueOnce([{ date: '2026-06-08', photo_path: '/b.jpg' }])
+
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-08'))
+    await waitFor(() => expect(result.current.isLoading).toBe(true))
+    await act(() => result.current.retry())
+
+    await act(() => {
+      resolveStale([{ date: '2026-06-07', photo_path: '/a.jpg' }])
+    })
+
+    expect(result.current.entries.map((e) => e.date)).toEqual(['2026-06-08'])
+    expect(result.current.error).toBe(false)
+  })
+
+  it('ignores a stale fetch that fails after a retry has already loaded', async () => {
+    let rejectStale!: (reason: Error) => void
+    const stale = new Promise<unknown[]>((_, reject) => {
+      rejectStale = reject
+    })
+    mockGetAllDays.mockReturnValueOnce(stale)
+    mockGetAllDays.mockResolvedValueOnce([{ date: '2026-06-08', photo_path: '/b.jpg' }])
+
+    const { result } = await renderHook(() => useDayDetailFeed('2026-06-08'))
+    await waitFor(() => expect(result.current.isLoading).toBe(true))
+    await act(() => result.current.retry())
+
+    await act(() => {
+      rejectStale(new Error('SQLITE_BUSY'))
+    })
+
+    expect(result.current.entries.map((e) => e.date)).toEqual(['2026-06-08'])
+    expect(result.current.error).toBe(false)
+  })
 })
