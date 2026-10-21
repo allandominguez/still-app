@@ -35,23 +35,32 @@ export function useMonthPager(months: MonthData[]): MonthPager {
     currentIndexRef.current = currentIndex
   }, [currentIndex])
 
+  // Thin FlatList call, only reached via the swipe handlers
+  /* istanbul ignore next */
   const scrollToIndex = (index: number) => {
-    const clamped = Math.max(0, Math.min(displayMonthsRef.current.length - 1, index))
-    flatListRef.current?.scrollToIndex({ index: clamped, animated: true })
+    flatListRef.current?.scrollToIndex({ index, animated: true })
   }
 
   // Swipe right = newer month (higher index), swipe left = older month (lower index)
+  // Needs real touch events
+  /* istanbul ignore next */
   const monthPanHandlers = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => isHorizontalSwipe(g.dx, g.dy),
       onPanResponderRelease: (_, g) => {
-        const target = monthSwipeTarget(g.dx, currentIndexRef.current)
+        const target = monthSwipeTarget(
+          g.dx,
+          currentIndexRef.current,
+          displayMonthsRef.current.length,
+        )
         if (target !== null) scrollToIndex(target)
       },
     }),
   ).current.panHandlers
 
   // Swipe right = newer year (year + 1), swipe left = older year (year - 1)
+  // Needs real touch events
+  /* istanbul ignore next */
   const yearPanHandlers = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => isHorizontalSwipe(g.dx, g.dy),

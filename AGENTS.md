@@ -82,7 +82,8 @@ Jest via the `jest-expo` preset with `@testing-library/react-native` (v14).
 - **Mock at system boundaries** — device APIs (camera, location, file system, SQLite) and the repository and photo-storage modules; not between a hook and the component that uses it, or between layers within a feature. A mock-call assertion is fine when the call itself is the outcome (a callback prop firing, a navigation action, a boundary mock receiving the data it should persist).
 - **Test names read as user-facing scenarios** — "saves immediately on blur without waiting for the debounce", not "calls upsertDay with the correct argument".
 - **Each commit that introduces logic includes its tests.** For UI work, settle the behaviour on a device first, then write the tests.
-- **Coverage is enforced** by `npm run test:coverage`: an overall floor, plus a stricter one for the data layer (`lib/repositories`, `lib/storage`, `lib/db`). The floors are in `package.json`'s Jest config.
+- **Coverage is enforced** by `npm run test:coverage`: a floor of 90 for the data layer (`lib/repositories`, `lib/storage`, `lib/db`) and for every hook file (`hooks/*.ts` in any directory, checked per file), plus a looser overall floor as a backstop for the rest. The floors are in `package.json`'s Jest config; the reasoning is in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+- **Untestable wiring is marked, not excused by a lower floor** — event and gesture glue that can't be reached without a heavy harness gets `/* istanbul ignore next */` with a one-line reason above it, and the logic around it stays in tested functions.
 
 React Native Testing Library 14 gotchas:
 

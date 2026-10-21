@@ -135,15 +135,23 @@ describe('isHorizontalSwipe', () => {
 
 describe('monthSwipeTarget', () => {
   it('advances to the next month index when swiping right past the threshold', () => {
-    expect(monthSwipeTarget(50, 3)).toBe(4)
+    expect(monthSwipeTarget(50, 3, 6)).toBe(4)
   })
 
   it('goes back to the previous month index when swiping left past the threshold', () => {
-    expect(monthSwipeTarget(-50, 3)).toBe(2)
+    expect(monthSwipeTarget(-50, 3, 6)).toBe(2)
   })
 
   it('does nothing when the swipe does not clear the threshold', () => {
-    expect(monthSwipeTarget(10, 3)).toBeNull()
+    expect(monthSwipeTarget(10, 3, 6)).toBeNull()
+  })
+
+  it('does nothing when swiping toward the future on the newest month', () => {
+    expect(monthSwipeTarget(50, 5, 6)).toBeNull()
+  })
+
+  it('does nothing when swiping toward the past on the oldest month', () => {
+    expect(monthSwipeTarget(-50, 0, 6)).toBeNull()
   })
 })
 

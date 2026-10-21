@@ -74,13 +74,15 @@
   "jest": {
     "preset": "jest-expo",
     "collectCoverageFrom": [
-      "App.tsx",
-      "index.ts",
       "features/**/*.{ts,tsx}",
       "lib/**/*.{ts,tsx}",
       "navigation/**/*.{ts,tsx}",
       "!**/__tests__/**",
-      "!**/*.d.ts"
+      "!**/*.d.ts",
+      "!navigation/RootNavigator.tsx",
+      "!lib/design/index.ts",
+      "!lib/storage/index.ts",
+      "!**/types.ts"
     ],
     "coverageThreshold": {
       "global": {
@@ -91,19 +93,25 @@
       },
       "./lib/repositories/": {
         "statements": 90,
-        "branches": 80,
+        "branches": 90,
         "functions": 90,
         "lines": 90
       },
       "./lib/storage/": {
         "statements": 90,
-        "branches": 80,
+        "branches": 90,
         "functions": 90,
         "lines": 90
       },
       "./lib/db/": {
         "statements": 90,
-        "branches": 80,
+        "branches": 90,
+        "functions": 90,
+        "lines": 90
+      },
+      "./**/hooks/*.ts": {
+        "statements": 90,
+        "branches": 90,
         "functions": 90,
         "lines": 90
       }

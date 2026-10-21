@@ -416,5 +416,18 @@ describe('usePhotoPicker', () => {
 
       expect(result.current.permissionBlocked).toBe(true)
     })
+
+    it('ignores a confirm when no photo is waiting', async () => {
+      const onCaptureComplete = jest.fn()
+      const { result } = await renderHook(() => usePhotoPicker(onCaptureComplete))
+
+      await act(async () => {
+        await result.current.onConfirmPhoto()
+      })
+
+      expect(mockSavePhoto).not.toHaveBeenCalled()
+      expect(onCaptureComplete).not.toHaveBeenCalled()
+      expect(result.current.pendingUri).toBeNull()
+    })
   })
 })

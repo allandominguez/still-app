@@ -48,6 +48,38 @@ describe('useMonthPager', () => {
     expect(result.current.currentIndex).toBe(MONTHS.length - 1)
   })
 
+  it('keeps showing the same month when nothing is viewable', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
+
+    await act(() => {
+      result.current.onViewableItemsChanged({ viewableItems: [viewableItem(0)] })
+    })
+    await act(() => {
+      result.current.onViewableItemsChanged({ viewableItems: [] })
+    })
+
+    expect(result.current.currentIndex).toBe(0)
+  })
+
+  it('keeps showing the same month when invalid index', async () => {
+    const { result } = await renderHook(() => useMonthPager(MONTHS))
+
+    await act(() => {
+      result.current.onViewableItemsChanged({ viewableItems: [viewableItem(0)] })
+    })
+    const invalid = {
+      item: {},
+      key: ``,
+      index: null,
+      isViewable: true,
+    }
+    await act(() => {
+      result.current.onViewableItemsChanged({ viewableItems: [invalid] })
+    })
+
+    expect(result.current.currentIndex).toBe(0)
+  })
+
   it('reports the page height once the container reports its layout', async () => {
     const { result } = await renderHook(() => useMonthPager(MONTHS))
 
