@@ -105,7 +105,6 @@ This repo is aligned to the template, with these deliberate differences. They ar
 - `android` and `ios` scripts use `expo run:*` (native builds, needed for the release APK), not `expo start --android/--ios`.
 - `lint` is `eslint .` with this repo's own flat config, not `expo lint`.
 - `CLAUDE.md` is gitignored: it is a personal layer that imports this file and adds machine-specific paths. This file is the shared one.
-- The CI `test` job runs `npm run test:coverage` (with coverage floors) instead of `npm test`.
 - `codeql.yml` scans both `actions` and `javascript-typescript` (a language matrix), keeping the coverage GitHub's default setup had.
 - `dependabot.yml` also groups `jest-expo` with the Expo SDK packages and ignores two extra Expo-curated packages (`@react-native/jest-preset`, and `test-renderer`'s minor and major lines).
 - Android release signing and the `arm64-v8a` restriction live outside the repo (`android/` is gitignored; credentials are in `~/.gradle/gradle.properties`) — see the release-build section of [`MAINTENANCE.md`](MAINTENANCE.md).
