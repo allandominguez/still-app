@@ -55,5 +55,14 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      # A cold runner re-compiles React Native's sources on first use, which pushed the first
+      # CalendarScreen test past its 5s limit. Entries are content-addressed, so the prefix
+      # fallback after a lockfile bump safely reuses every file that didn't change.
+      - uses: actions/cache@v6
+        with:
+          path: .jest-cache
+          key: jest-cache-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            jest-cache-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-
       # Same as `npm test` plus the coverage floors in package.json's jest config.
-      - run: npm run test:coverage
+      - run: npm run test:coverage -- --cacheDirectory=.jest-cache
