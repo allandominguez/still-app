@@ -11,7 +11,7 @@ Findings from `npm audit` (or other dependency/security scanners) that are confi
 device bundle are documented here with the reasoning, rather than silently ignored, hidden behind `overrides`, or forced through
 with a breaking fix.
 
-`npm audit` reports each advisory once per ancestor package, so its headline count overstates things: the four advisories below
+`npm audit` reports each advisory once per ancestor package, so its headline count overstates things: the three advisories below
 are the only root findings. For each, the vulnerable package is absent from the production Android
 bundle — checked by listing the bundle's source map (see "How to re-verify") — so none of them can execute on a user's device.
 
@@ -29,18 +29,6 @@ machine or in CI. It is not part of the app bundle.
 
 **Why no fix is applied:** no patched version of `braces` exists (the latest release, 3.0.3, is the affected one). `jest-expo`
 also pins Jest 29, so moving to a newer Jest is not available either.
-
-### `node-forge` <= 1.4.0 (high) — via `expo` → `@expo/cli` → `@expo/code-signing-certificates`
-
-**Advisory:** [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) — RSA PKCS#1 v1.5 signature verification
-accepts extra nested DigestAlgorithm elements.
-
-**Risk:** `node-forge` is used by Expo's CLI to generate and validate certificates for its code-signing feature, which is part of
-the developer tooling (`expo start` and related commands). This app does not use `expo-updates` or Expo code signing, so there is
-no signature of untrusted origin to verify, and the package is not part of the app bundle.
-
-**Why no fix is applied:** no patched version of `node-forge` exists (the latest release, 1.4.0, is the affected one), and the
-dependency sits inside Expo's own CLI, so it can only move when Expo moves it.
 
 ### `sprintf-js` <= 1.1.3 (moderate) — via `@react-native/jest-preset` → `babel-jest` → … → `js-yaml` 3 → `argparse` 1
 
@@ -73,7 +61,7 @@ declared as `^7.x`, untested against `expo prebuild`. This repo deliberately car
 
 Re-run `npm audit` and re-triage whenever:
 
-- a **patched release appears** for `braces`, `node-forge` or `sprintf-js`, or `xcode` moves off `uuid@7` — the finding should then
+- a **patched release appears** for `braces` or `sprintf-js`, or `xcode` moves off `uuid@7` — the finding should then
   resolve with a plain `npm update` or `npm audit fix` and its entry here should be deleted;
 - an **Expo SDK or Jest upgrade** changes the chains above (see [`MAINTENANCE.md`](MAINTENANCE.md));
 - an advisory appears that is **not listed here**, or any finding is **critical**;
